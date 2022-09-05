@@ -230,22 +230,22 @@ partialSortByBounds cmp a k l u
 
 partitionBy :: forall m v e. (PrimMonad m, MVector v e)
             => Comparison e -> v (PrimState m) e -> e -> Int -> Int -> m Int
-partitionBy cmp a = partUp
+partitionBy cmp a p = partUp
  where
- partUp :: e -> Int -> Int -> m Int
- partUp p l u
+ partUp :: Int -> Int -> m Int
+ partUp l u
    | l < u = do e <- unsafeRead a l
                 case cmp e p of
-                  LT -> partUp p (l+1) u
-                  _  -> partDown p l (u-1)
+                  LT -> partUp (l+1) u
+                  _  -> partDown l (u-1)
    | otherwise = return l
 
- partDown :: e -> Int -> Int -> m Int
- partDown p l u
+ partDown :: Int -> Int -> m Int
+ partDown l u
    | l < u = do e <- unsafeRead a u
                 case cmp p e of
-                  LT -> partDown p l (u-1)
-                  _  -> unsafeSwap a l u >> partUp p (l+1) u
+                  LT -> partDown l (u-1)
+                  _  -> unsafeSwap a l u >> partUp (l+1) u
    | otherwise = return l
 {-# INLINE partitionBy #-}
 
